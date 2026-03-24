@@ -6,7 +6,6 @@ Dash приложение для мониторинга WB, МойСклад и 
 import dash
 from dash import dcc, html, callback, Input, Output
 import plotly.graph_objects as go
-import plotly.express as px
 import json
 from datetime import datetime, timedelta
 import os
@@ -384,14 +383,14 @@ def update_top_products(tab):
     products = ['BYSTER', 'F15_H1', 'Полка прозрачная', 'F15_H4', 'F15_H7']
     revenues = [4949670, 1977140, 1823598, 743717, 712863]
     
-    fig = px.bar(
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
         x=revenues, y=products,
         orientation='h',
-        labels={'x': 'Выручка (₽)', 'y': 'Товар'},
-        color=revenues,
-        color_continuous_scale='Blues',
-    )
-    fig.update_layout(height=400, template='plotly_white', showlegend=False)
+        marker=dict(color=revenues, colorscale='Blues'),
+        hovertemplate='<b>%{y}</b><br>Выручка: %{x:,.0f}₽<extra></extra>',
+    ))
+    fig.update_layout(height=400, template='plotly_white', showlegend=False, xaxis_title='Выручка (₽)', yaxis_title='Товар')
     return fig
 
 @callback(
@@ -402,14 +401,14 @@ def update_margin(tab):
     products = ['Полка прозрачная', 'BYSTER', 'F15_H7', 'F15_H1', 'F15_H4']
     margins = [60.5, 43.3, 52.3, 50.4, 43.6]
     
-    fig = px.bar(
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
         x=margins, y=products,
         orientation='h',
-        labels={'x': 'Маржа (%)', 'y': 'Товар'},
-        color=margins,
-        color_continuous_scale='Greens',
-    )
-    fig.update_layout(height=400, template='plotly_white', showlegend=False)
+        marker=dict(color=margins, colorscale='Greens'),
+        hovertemplate='<b>%{y}</b><br>Маржа: %{x:.1f}%<extra></extra>',
+    ))
+    fig.update_layout(height=400, template='plotly_white', showlegend=False, xaxis_title='Маржа (%)', yaxis_title='Товар')
     return fig
 
 @callback(
@@ -420,8 +419,14 @@ def update_stock(tab):
     warehouses = ['Основной', 'ВБ (Запас)', 'ОЗОН', 'КЕ (Запас)', 'Прочие']
     counts = [450, 280, 120, 90, 60]
     
-    fig = px.pie(values=counts, names=warehouses, hole=0.3)
-    fig.update_layout(height=400)
+    fig = go.Figure()
+    fig.add_trace(go.Pie(
+        labels=warehouses,
+        values=counts,
+        hole=0.3,
+        hovertemplate='<b>%{label}</b><br>Товаров: %{value}<extra></extra>',
+    ))
+    fig.update_layout(height=400, template='plotly_white')
     return fig
 
 @callback(
@@ -432,8 +437,13 @@ def update_top_stock(tab):
     products = ['F15_H1', 'BYSTER', 'F15_H4', 'S6_H7', 'Полка прозрачная']
     stocks = [280, 220, 145, 120, 95]
     
-    fig = px.bar(x=products, y=stocks, labels={'y': 'Количество (шт)'})
-    fig.update_layout(height=400, template='plotly_white')
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        x=products, y=stocks,
+        marker=dict(color='#667eea'),
+        hovertemplate='<b>%{x}</b><br>Товаров: %{y} шт<extra></extra>',
+    ))
+    fig.update_layout(height=400, template='plotly_white', yaxis_title='Количество (шт)', xaxis_title='Товар')
     return fig
 
 @callback(
@@ -446,9 +456,9 @@ def update_wholesale(tab):
     retail = [8490, 2871, 2299, 2307, 1896]
     
     fig = go.Figure()
-    fig.add_trace(go.Bar(x=products, y=retail, name='Розница WB', marker_color='#764ba2'))
-    fig.add_trace(go.Bar(x=products, y=wholesale, name='Оптовая цена', marker_color='#667eea'))
-    fig.update_layout(barmode='group', height=400, template='plotly_white')
+    fig.add_trace(go.Bar(x=products, y=retail, name='Розница WB', marker_color='#764ba2', hovertemplate='<b>%{x}</b><br>Розница: %{y:,.0f}₽<extra></extra>'))
+    fig.add_trace(go.Bar(x=products, y=wholesale, name='Оптовая цена', marker_color='#667eea', hovertemplate='<b>%{x}</b><br>Оптовая: %{y:,.0f}₽<extra></extra>'))
+    fig.update_layout(barmode='group', height=400, template='plotly_white', yaxis_title='Цена (₽)', xaxis_title='Товар')
     return fig
 
 @callback(
